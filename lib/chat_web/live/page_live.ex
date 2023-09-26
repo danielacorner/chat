@@ -11,7 +11,7 @@ defmodule ChatWeb.PageLive do
 
   @impl true
   def mount(_params, _session, socket) do
-      {:ok, assign(socket, query: "", results: %{})}
+    {:ok, assign(socket, query: "", results: %{})}
   end
 
   @impl true
@@ -21,5 +21,4 @@ defmodule ChatWeb.PageLive do
     Logger.info("click!")
     {:noreply, push_redirect(socket, to: random_slug)}
   end
-
 end
