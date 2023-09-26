@@ -13,7 +13,12 @@ defmodule ChatWeb.RoomLive do
     >
       <div id="chat-messages" phx-update="append" class="flex flex-grow flex-col gap-1 border rounded p-4">
         <div :for={message <- @messages} id={message.uuid}>
-          <p><strong><%= message.username %></strong>: <%= message.content %></p>
+        <%!-- handle message.type = :system vs :user --%>
+          <%= if message.type == :system do %>
+            <p class="qitalic"><%= message.content %></p>
+          <% else %>
+            <p><strong><%= message.username %></strong>: <%= message.content %></p>
+          <% end %>
         </div>
       </div>
 
@@ -63,7 +68,7 @@ defmodule ChatWeb.RoomLive do
 
   @impl true
   def handle_event("save", %{"chat" => %{"message" => message}}, socket) do
-    message = %{uuid: UUID.uuid4(), content: message, username: socket.assigns.username}
+    message = %{type: :user, uuid: UUID.uuid4(), content: message, username: socket.assigns.username}
     ChatWeb.Endpoint.broadcast(socket.assigns.topic, "new-message", message)
     {:noreply, assign(socket, message: "")}
   end
@@ -84,14 +89,14 @@ defmodule ChatWeb.RoomLive do
       joins
       |> Map.keys()
       |> Enum.map(fn username ->
-        %{uuid: UUID.uuid4(), content: "#{username} joined", username: "system"}
+        %{type: :system, uuid: UUID.uuid4(), content: "#{username} joined"}
       end)
 
     leave_messages =
       leaves
       |> Map.keys()
       |> Enum.map(fn username ->
-        %{uuid: UUID.uuid4(), content: "#{username} left", username: "system"}
+        %{type: :system, uuid: UUID.uuid4(), content: "#{username} left"}
       end)
     {:noreply, assign(socket, messages: join_messages ++ leave_messages)}
   end
