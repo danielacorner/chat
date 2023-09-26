@@ -23,9 +23,12 @@ defmodule ChatWeb.RoomLive do
       </div>
 
       <div id="user-list">
-        <h2 class="text-lg">Users online</h2>
-        <p>user 1</p>
-        <p>user 2</p>
+        <h2 class="text-xl">Users online</h2>
+        <ul>
+          <li :for={username <- @user_list} id={username}>
+            <%= username %>
+          </li>
+        </ul>
       </div>
     </div>
     <.simple_form for={@chat} phx-change="validate" phx-submit="save" phx-change="change">
@@ -57,6 +60,7 @@ defmodule ChatWeb.RoomLive do
        topic: topic,
        username: username,
        messages: [],
+       user_list: [],
        temporary_assigns: [messages: []]
      )}
   end
@@ -98,6 +102,10 @@ defmodule ChatWeb.RoomLive do
       |> Enum.map(fn username ->
         %{type: :system, uuid: UUID.uuid4(), content: "#{username} left"}
       end)
-    {:noreply, assign(socket, messages: join_messages ++ leave_messages)}
+
+      user_list = ChatWeb.Presence.list(socket.assigns.topic)
+      |> Map.keys()
+
+    {:noreply, assign(socket, messages: join_messages ++ leave_messages, user_list: user_list)}
   end
 end
