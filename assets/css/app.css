@@ -3,3 +3,10 @@
 @import "tailwindcss/utilities";
 
 /* This file is for your main application CSS */
+
+body {
+  height: 100vh;
+}
+main {
+  height: 90vh;
+}
