@@ -31,7 +31,7 @@ defmodule ChatWeb.RoomLive do
         </ul>
       </div>
     </div>
-    <.simple_form for={@chat} phx-change="validate" phx-submit="save" phx-change="change">
+    <.simple_form for={@chat} phx-submit="save" phx-change="change">
       <.input field={@chat[:message]} value={@message} type="textarea" label="Message" required />
       <.button type="submit" phx-disable-with="Sending ...">Send</.button>
     </.simple_form>
@@ -65,10 +65,10 @@ defmodule ChatWeb.RoomLive do
      )}
   end
 
-  @impl true
-  def handle_event("validate", _params, socket) do
-    {:noreply, socket}
-  end
+  # @impl true
+  # def handle_event("validate", _params, socket) do
+  #   {:noreply, socket}
+  # end
 
   @impl true
   def handle_event("save", %{"chat" => %{"message" => message}}, socket) do
