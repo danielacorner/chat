@@ -5,30 +5,39 @@ defmodule ChatWeb.RoomLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <p>Currently chatting in <strong><%= @room_id %></strong></p>
+    <p>Currently chatting in <strong><%= @room_id %></strong> as <strong><%= @username %></strong></p>
 
     <div
       id="chat-container"
-      class="h-full flex flex-col flex-grow space-between gap-2 border rounded p-4 my-2"
+      class="h-full flex flex-row flex-grow space-between gap-2 my-2"
     >
-      <div id="chat-messages" phx-update="append" class="flex flex-grow flex-col gap-1">
+      <div id="chat-messages" phx-update="append" class="flex flex-grow flex-col gap-1 border rounded p-4">
         <div :for={message <- @messages} id={message.uuid}>
-          <p ><%= message.content %></p>
+          <p><strong><%= message.username %></strong>: <%= message.content %></p>
         </div>
       </div>
 
-      <.simple_form for={@chat} phx-change="validate" phx-submit="save">
-        <.input field={@chat[:message]} type="textarea" label="Message" required />
-        <.button type="submit" phx-disable-with="Sending ...">Send</.button>
-      </.simple_form>
+      <div id="user-list">
+        <h2 class="text-lg">Users online</h2>
+        <p>user 1</p>
+        <p>user 2</p>
+      </div>
     </div>
+    <.simple_form for={@chat} phx-change="validate" phx-submit="save" phx-change="change">
+      <.input field={@chat[:message]} value={@message} type="textarea" label="Message" required />
+      <.button type="submit" phx-disable-with="Sending ...">Send</.button>
+    </.simple_form>
     """
   end
 
   @impl true
   def mount(%{"id" => room_id}, _session, socket) do
     topic = "room:#{room_id}"
-    ChatWeb.Endpoint.subscribe(topic)
+    username = MnemonicSlugs.generate_slug(2)
+    if connected?(socket) do
+      ChatWeb.Endpoint.subscribe(topic)
+      ChatWeb.Presence.track(self(), topic, username, %{})
+    end
 
     form =
       %{}
@@ -38,9 +47,11 @@ defmodule ChatWeb.RoomLive do
     {:ok,
      assign(socket,
        room_id: room_id,
+       message: "",
        chat: form,
        topic: topic,
-       messages: [%{uuid: UUID.uuid4(), content: "Welcome to #{room_id}!"}],
+       username: username,
+       messages: [],
        temporary_assigns: [messages: []]
      )}
   end
@@ -52,13 +63,36 @@ defmodule ChatWeb.RoomLive do
 
   @impl true
   def handle_event("save", %{"chat" => %{"message" => message}}, socket) do
-    message = %{uuid: UUID.uuid4(), content: message}
+    message = %{uuid: UUID.uuid4(), content: message, username: socket.assigns.username}
     ChatWeb.Endpoint.broadcast(socket.assigns.topic, "new-message", message)
-    {:noreply, socket}
+    {:noreply, assign(socket, message: "")}
+  end
+
+  @impl true
+  def handle_event("change", %{"chat" => %{"message" => message}}, socket) do
+    {:noreply, assign(socket, message: message)}
   end
 
   @impl true
   def handle_info(%{event: "new-message", payload: message}, socket) do
     {:noreply, assign(socket, messages: [message])}
+  end
+
+  @impl true
+  def handle_info(%{event: "presence_diff", payload: %{leaves: leaves, joins: joins}}, socket) do
+    join_messages =
+      joins
+      |> Map.keys()
+      |> Enum.map(fn username ->
+        %{uuid: UUID.uuid4(), content: "#{username} joined", username: "system"}
+      end)
+
+    leave_messages =
+      leaves
+      |> Map.keys()
+      |> Enum.map(fn username ->
+        %{uuid: UUID.uuid4(), content: "#{username} left", username: "system"}
+      end)
+    {:noreply, assign(socket, messages: join_messages ++ leave_messages)}
   end
 end
