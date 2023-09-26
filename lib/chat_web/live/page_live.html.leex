@@ -1,0 +1,23 @@
+defmodule ChatWeb.PageLive do
+  use ChatWeb, :live_view
+
+  def render(assigns) do
+    ~H"""
+    Current temperature: <%= @temperature %>
+    """
+  end
+
+  # def mount(_params, _session, socket) do
+    #   {:ok, assign(socket, query: "", results: %{})}
+    # end
+
+  @impl true
+  def mount(_params, %{"current_user_id" => user_id}, socket) do
+    temperature = Thermostat.get_user_reading(user_id)
+    {:ok, assign(socket, :temperature, temperature)}
+  end
+
+  # @impl true
+  # def
+
+end
