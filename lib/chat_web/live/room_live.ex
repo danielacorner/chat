@@ -31,7 +31,7 @@ defmodule ChatWeb.RoomLive do
         </ul>
       </div>
     </div>
-    <.simple_form for={@chat} phx-submit="save" phx-change="change">
+    <.simple_form for={@chat} phx-submit="save" phx-change="change" class="chat-form">
       <.input field={@chat[:message]} value={@message} type="textarea" label="Message" required />
       <.button type="submit" phx-disable-with="Sending ...">Send</.button>
     </.simple_form>
@@ -42,6 +42,7 @@ defmodule ChatWeb.RoomLive do
   def mount(%{"id" => room_id}, _session, socket) do
     topic = "room:#{room_id}"
     username = MnemonicSlugs.generate_slug(2)
+
     if connected?(socket) do
       ChatWeb.Endpoint.subscribe(topic)
       ChatWeb.Presence.track(self(), topic, username, %{})
@@ -72,7 +73,13 @@ defmodule ChatWeb.RoomLive do
 
   @impl true
   def handle_event("save", %{"chat" => %{"message" => message}}, socket) do
-    message = %{type: :user, uuid: UUID.uuid4(), content: message, username: socket.assigns.username}
+    message = %{
+      type: :user,
+      uuid: UUID.uuid4(),
+      content: message,
+      username: socket.assigns.username
+    }
+
     ChatWeb.Endpoint.broadcast(socket.assigns.topic, "new-message", message)
     {:noreply, assign(socket, message: "")}
   end
@@ -103,7 +110,8 @@ defmodule ChatWeb.RoomLive do
         %{type: :system, uuid: UUID.uuid4(), content: "#{username} left"}
       end)
 
-      user_list = ChatWeb.Presence.list(socket.assigns.topic)
+    user_list =
+      ChatWeb.Presence.list(socket.assigns.topic)
       |> Map.keys()
 
     {:noreply, assign(socket, messages: join_messages ++ leave_messages, user_list: user_list)}

@@ -40,7 +40,7 @@ liveSocket.connect()
 window.liveSocket = liveSocket
 
 document.addEventListener('DOMContentLoaded', () => {
-  const form = document.querySelector('.simple_form');
+  const form = document.querySelector('.chat-form');
 
   form.addEventListener('keypress', (event) => {
     if (event.key === 'Enter') {
