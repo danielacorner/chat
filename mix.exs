@@ -49,6 +49,7 @@ defmodule Chat.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:mnemonic_slugs, "~> 0.0.3"},
       {:uuid, "~> 1.1.8"},
+      {:hackney, "~> 1.9"}
     ]
   end
 
