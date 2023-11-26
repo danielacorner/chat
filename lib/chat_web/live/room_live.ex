@@ -14,11 +14,11 @@ defmodule ChatWeb.RoomLive do
       <div id="chat-messages" phx-update="append" class="flex flex-grow flex-col gap-1 border rounded p-4">
         <div :for={message <- @messages} id={message.uuid}>
         <%!-- handle message.type = :system vs :user --%>
-          <%= if message.type == :system do %>
-            <p class="qitalic"><%= message.content %></p>
-          <% else %>
-            <p><strong><%= message.username %></strong>: <%= message.content %></p>
-          <% end %>
+        <%= if message.type == :system do %>
+          <p class="italic"><%= message.content %></p>
+        <% else %>
+          <p><strong><%= message.username %></strong>: <%= ChatWeb.Helpers.convert_links_to_html(message.content) %></p>
+        <% end %>
         </div>
       </div>
 
