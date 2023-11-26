@@ -17,7 +17,8 @@ defmodule ChatWeb.RoomLive do
         <%= if message.type == :system do %>
           <p class="italic"><%= message.content %></p>
         <% else %>
-          <p><strong><%= message.username %></strong>: <%= ChatWeb.Helpers.convert_links_to_html(message.content) %></p>
+          <p><strong><%= message.username %></strong>: <%= message.content %></p>
+          <%!-- <p><strong><%= message.username %></strong>: <%= raw(ChatWeb.Helpers.convert_links_to_html(message.content)) %></p> --%>
         <% end %>
         </div>
       </div>
@@ -32,7 +33,7 @@ defmodule ChatWeb.RoomLive do
       </div>
     </div>
     <.simple_form for={@chat} phx-submit="save" phx-change="change" class="chat-form">
-      <.input field={@chat[:message]} value={@message} type="textarea" label="Message" required />
+      <.input field={@chat[:message]} value={@message} type="textarea" label="Message" required phx-hook="SubmitOnEnter" />
       <.button type="submit" phx-disable-with="Sending ...">Send</.button>
     </.simple_form>
     """

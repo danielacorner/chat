@@ -9,7 +9,8 @@ import Config
 
 # Configures the endpoint
 config :chat, ChatWeb.Endpoint,
-  url: [host: "localhost"],
+  url: [host: "localhost", port: 4000],
+  server: true,
   render_errors: [
     formats: [html: ChatWeb.ErrorHTML, json: ChatWeb.ErrorJSON],
     layout: false
