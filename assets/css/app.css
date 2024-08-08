@@ -10,3 +10,6 @@ body {
 main {
   height: 70vh;
 }
+#chat-messages div p:nth-child(2) {
+  user-select: all;
+}

@@ -12,12 +12,28 @@ defmodule ChatWeb.RoomLive do
       class="h-full flex flex-row flex-grow space-between gap-2 my-2"
     >
       <div id="chat-messages" phx-update="append" class="flex flex-grow flex-col gap-1 border rounded p-4">
-        <div :for={message <- @messages} id={message.uuid}>
+        <div :for={message <- @messages}
+          class="message"
+          id={message.uuid}
+        >
         <%!-- handle message.type = :system vs :user --%>
         <%= if message.type == :system do %>
-          <p class="italic"><%= message.content %></p>
+          <p class="italic" id={message.uuid}><%= message.content %></p> <button onclick="copyToClipboard()" class="copy-button"
+          >copy message</button>
+          <script>
+            function copyToClipboard() {
+              var copyText = document.getElementById("<%= message.uuid %>");
+              copyText.select();
+              copyText.setSelectionRange(0, 99999);
+              document.execCommand("copy");
+              alert("Copied the text: " + copyText.value);
+            }
+</script>
         <% else %>
-          <p><strong><%= message.username %></strong>: <%= message.content %></p>
+        <div>
+          <p class="message-username"><strong><%= message.username %></strong>:</p>
+          <p class="message-content"><pre><%= message.content %></pre></p>
+        </div>
           <%!-- <p><strong><%= message.username %></strong>: <%= raw(ChatWeb.Helpers.convert_links_to_html(message.content)) %></p> --%>
         <% end %>
         </div>
