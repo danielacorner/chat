@@ -10,6 +10,14 @@ body {
 main {
   height: 70vh;
 }
-#chat-messages div p:nth-child(2) {
-  user-select: all;
+#chat-messages {
+  max-height: 60vh;
+}
+#chat-messages .copy-button.copied {
+  opacity: 1;
+  color: #15803d;
+}#chat_message {
+  max-height: 320px;
+  overflow-y: auto;
+  resize: vertical;
 }
